@@ -1,0 +1,16 @@
+{
+  "name": "abi-egg-counter-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.13.0" },
+  "scripts": {
+    "start": "node src/cli.js run",
+    "init": "node src/cli.js init",
+    "scan": "node src/cli.js scan",
+    "status": "node src/cli.js status",
+    "sync": "node src/cli.js once",
+    "test": "node --test"
+  },
+  "dependencies": { "csv-parse": "^7.0.2" }
+}

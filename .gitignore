@@ -1,0 +1,25 @@
+# Dependency
+node_modules/
+
+# Credential dan environment lokal
+.env
+.env.*
+!.env.example
+
+# Konfigurasi tiap PC
+config.json
+
+# SQLite beserta file pendampingnya
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+
+# Log
+logs/
+*.log
+
+# Data produksi jika masuk folder project
+*.csv
