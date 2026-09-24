@@ -4,7 +4,7 @@ import { mkdtemp, rm, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
+import { promisify, stripVTControlCharacters } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { parseCsv, normalizeRow, stableRead } from '../src/csv.js';
 import { Store } from '../src/store.js';
@@ -25,10 +25,14 @@ test('CLI scans twice without duplicates and sync defaults to disabled', async (
     await writeFile(file, 'date,time,house,count,\n20260917,08:00:00,2,500,\n');
     await writeFile(join(home, 'config.json'), JSON.stringify({ csvPath: file, encoding: 'utf-8', apiUrl: '', enabled: false, intervalSeconds: 300 }));
     const cli = fileURLToPath(new URL('../src/cli.js', import.meta.url));
-    const run = (command) => promisify(execFile)(process.execPath, [cli, command], {
-      env: { ...process.env, ABI_EGG_HOME: home, ABI_EGG_CREDENTIAL: '' }, timeout: 15000,
-    });
-    assert.match((await run('scan')).stdout, /inserted: 1/);
+    const run = async (command, color = '0') => {
+      const result = await promisify(execFile)(process.execPath, [cli, command], {
+        env: { ...process.env, ABI_EGG_HOME: home, ABI_EGG_CREDENTIAL: '', FORCE_COLOR: color }, timeout: 15000,
+      });
+      // CLI assertions must work with both colored and plain terminal output.
+      return { ...result, stdout: stripVTControlCharacters(result.stdout) };
+    };
+    assert.match((await run('scan', '1')).stdout, /inserted: 1/);
     assert.match((await run('scan')).stdout, /inserted: 0/);
     const endpoint = 'http://127.0.0.1:5062/api/egg-counter-ai/sessions';
     await promisify(execFile)(process.execPath, [cli, 'set-endpoint', endpoint], { env: { ...process.env, ABI_EGG_HOME: home } });
